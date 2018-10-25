@@ -25,9 +25,23 @@ function [E,dE_dA,dE_db] = myAffineObjective3D(A, b, I, J)
 if nargout > 1
    [X,Y,Z] = ndgrid(1:size(I,1),1:size(I,2),1:size(I,3));
    T = A * [X(:)';Y(:)';Z(:)'] + b;
-   reshape(interpn(X,Y,Z,moving,T(1,:)',T(2,:)',T(3,:)',method,0),image_size(1),image_size(2),image_size(3));
+   transform = interpn(X,Y,Z,J,T(1,:)',T(2,:)',T(3,:)','linear',0);
+   %compute E
+   E = (norm(I(:) - transform)) ^ 2;
+   % compute Å›E/Å›A and Å›E/Å›b
+   difference = (I - transform);
+   [dJ_dy, dJ_dx, dJ_dz] = gradient(J);
+   
+   for i = 1:3
+        interp_dJ_dy = interpn(X,Y,Z,dJ_dy,'linear',0);
+   end
+%    de_dA = A .* difference 
+else
+end
+   
 %    interpn     
     % Your code to compute the elements of dE_dA and dE_db
+    
     
 end
 

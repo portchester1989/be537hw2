@@ -28,6 +28,17 @@ if nargout > 1
    transform = interpn(X,Y,Z,J,T(1,:)',T(2,:)',T(3,:)','linear',0);
    %compute E
    E = (norm(I(:) - transform)) ^ 2;
+   % compute Å›E/Å›A and Å›E/Å›b
+   difference = (I - transform);
+   [dJ_dy, dJ_dx, dJ_dz] = gradient(J);
+   gradients = {dJ_dy, dJ_dx, dJ_dz};   
+   for i = 1:3
+      this_interp_dJ = interpn(X,Y,Z,gradients{i},'linear',0);
+      
+   end
+%    de_dA = A .* difference 
+else
+end
    
 %    interpn     
     % Your code to compute the elements of dE_dA and dE_db
