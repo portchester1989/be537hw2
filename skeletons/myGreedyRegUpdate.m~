@@ -5,7 +5,7 @@ T = [X(:)'+ ux(:)';Y(:) + uy(:)';Z(:)' + uz(:)'] ;
 transform = interpn(X,Y,Z,J,T(1,:)',T(2,:)',T(3,:)','linear',0);
 E = (norm(I(:) - transform)) ^ 2;
 [dJ_dy, dJ_dx, dJ_dz] = gradient(J);
-% difference = (I - transform);
+difference = (I - transform);
 % w_x = 2 * difference * [dJ_dx(:)';dJ_dy(:)';dJ_dz(:)'];
 gradients = {dJ_dx, dJ_dy, dJ_dz}; 
 w_sm = zeros(3,size(transform,1));
@@ -26,13 +26,7 @@ displacements = {ux,uy,uz};
 for j = 1:3
     this_w_nrm = w_nrm(j,:);
     this_displacement = interpn(X,Y,Z,displacements(j),X(:) + w_nrm(1,:),Y(:) + w_nrm(2,:),Z(:) +  w_nrm(3,:));
-    if j == 1
-     Ux = myGaussianLPF(reshape(this_w_nrm + this_displacement,size(J)),tau);
-    elseif j == 2
-     Uy = myGaussianLPF(reshape(this_w_nrm + this_displacement,size(J)),tau);
-    else
-     Uz = myGaussianLPF(reshape(this_w_nrm + this_displacement,size(J)),tau);   
-    end
+    this_myGaussianLPF(reshape(this_w_nrm + this_displacement,size(J)),sigma)
 end
 % t = 0;
 % for 
