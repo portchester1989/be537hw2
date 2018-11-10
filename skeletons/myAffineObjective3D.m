@@ -22,22 +22,26 @@ function [E,dE_dA,dE_db] = myAffineObjective3D(A, b, I, J)
 % Compute the objective function value (E)
 
 % Compute the partial derivatives only if requested
+
 [X,Y,Z] = ndgrid(1:size(I,1),1:size(I,2),1:size(I,3));
+grids = {X,Y,Z};
 T = A * [X(:)';Y(:)';Z(:)'] + b;
 transform = interpn(X,Y,Z,J,T(1,:)',T(2,:)',T(3,:)','linear',0);
 %compute E
 E = (norm(I(:) - transform)) ^ 2;
 if nargout > 1
    % compute Å›E/Å›A and Å›E/Å›b
-   difference = (I - transform);
+   difference = (I - reshape(transform,size(I)));
    [dJ_dy, dJ_dx, dJ_dz] = gradient(J);
    gradients = {dJ_dx, dJ_dy, dJ_dz}; 
    dE_dA = zeros(3,3);
    dE_db = zeros(3,1);
    for i = 1:3
-      this_interp_dJ = interpn(X,Y,Z,gradients{i},'linear',0);
-      dE_dA(i,:) = -2 * sum( difference .* this_interp_dJ .* X) * ones(1,3);
-      dE_db(i) = -2  * sum(difference .* this_interp_dJ);
+       for j =1:3
+        this_interp_dJ = reshape(interpn(gradients{i},T(1,:)',T(2,:)',T(3,:)','linear',0),size(J));
+        dE_dA(i,j) = -2 * sum(sum(sum( difference .* this_interp_dJ .* grids{j}))) ;
+       end
+       dE_db(i) = -2  * sum(sum(sum(difference .* this_interp_dJ)));
    end
 %    de_dA = 2 * A(i,:) * sum( difference .* this_interp_dJ .* X)
 else
